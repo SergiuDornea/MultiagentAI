@@ -75,6 +75,35 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
+        # TODO check for win, if game state is win return a high number
+        if  successorGameState.isWin():
+            return 99999999
+
+        # Todo set the necessary data
+        ghostList = successorGameState.getGhostPositions()  # ghost position
+        foodList = newFood.asList() #food position
+        distance = list() #an empty list for the distances to be calculated
+        for food in foodList:
+            dist = manhattanDistance(food, newPos) #caclulate the distance and append it to the list
+            distance.append(dist)
+
+        #     TODO set the next food the one with the shortest distance
+        nextFood = min(distance)
+
+        # todo check if the ghost is close to newPos
+        for ghost in newGhostStates:
+            ghostDistance = manhattanDistance(newPos, ghost.getPosition())
+            if ghostDistance < 2: #if the ghost is too close
+                return -99999999
+
+        #     TODO return the score according to the state of the game + next food
+        #  multiply with a bigger nunber to prioritize the higher score instead
+        # and the division is responsible to give a higher score to a closer distance
+        # so that the agent chooses the bigger number
+        finalScore = successorGameState.getScore() *9999 + 9 / nextFood
+        return finalScore
+
+
         return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState: GameState):
@@ -136,6 +165,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
