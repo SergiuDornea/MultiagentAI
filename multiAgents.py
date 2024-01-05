@@ -247,22 +247,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
             # Return the maximum value and the corresponding action
             return v, pickedAction
 
-        # def value(state):
-        #TODO am renuntant la value()
-        def value(state, typeOfAgent, depth):
-            # If the state is a terminal state:
-            # return the state's utility
-            # TODO check if the state is a terminal state (lost, won, reached depth limit)
-            if state.isLose() or state.isWin()or depth == self.depth:
-                return self.evaluationFunction(state)
-
-            # If the next agent is MAX: return max value(state)
-            if typeOfAgent == 0: #the agent is our pacman => max
-                return maxValue(state, depth)
-            else:# If the next agent is MIN: return min value(state)
-                #the agent is a ghost => min
-                return minValue(state, typeOfAgent, depth)
-
 #TODO start with max
         optimalVal,optimalAction = maxValue(state, 0)
         return optimalAction
@@ -279,6 +263,121 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+
+        # python pacman.py -p AlphaBetaAgent
+
+        #FAIL: test_cases\q3\6-tied-root.test
+#***     Incorrect generated nodes for depth=3
+#***         Student generated nodes: A B max min1 min2
+#***         Correct generated nodes: A B C max min1 min2
+#***     Tree:
+#***         max
+#***        /   \
+#***     min1    min2
+#***      |      /  \
+#***      A      B   C
+#***     10     10   0
+
+        #
+
+
+#todo trebuie sa îl adaptați pentru situatia in care in joc se găsesc mai multi strigoi (deci trebuie adaptat pseudocodul pentru mai multe nivele de min).
+        # def min-value(state, a, b):
+        # Initialize v
+        # for each successor of state:
+        # v=min(v, value(successor, a, b))
+        # if v<= a return v
+        # b =min(b,v)
+        # return v
+        def minValue(state, typeOfAgent, depth, alfa , beta):
+            # TODO check for game state
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state), None
+
+            # Initialize V = inf
+            #     TODO set
+            #      -v as infinity
+            #      -actions for min agent - pass typeOfAgent as index
+            #      -picked action as null
+            v = float('inf')
+            pickedAction = None
+            legalActions = state.getLegalActions(typeOfAgent)  # lega; action for ghosts
+
+            # TODO check for legal actions, if no more actions return eval function
+            if not legalActions:
+                return self.evaluationFunction(state), None
+
+            # for each successor of state:
+            for successorAction in legalActions:
+                # if the agent is the last one, call the maxValue function for Pacman
+                if typeOfAgent == state.getNumAgents() - 1:
+                    if depth == self.depth - 1:
+                        val, _ = self.evaluationFunction(state.generateSuccessor(typeOfAgent, legalActions))
+                    else:
+                        val, _ = maxValue(state.generateSuccessor(typeOfAgent,legalActions), depth+1, alfa, beta )
+                # if the next agent is not the last one - minValue
+                else:
+                    val, _ = minValue(state.generateSuccessor(typeOfAgent, successorAction), typeOfAgent + 1, depth, alfa, beta)
+
+                # if  better action is found
+                if v > val:
+                    v, pickedAction = val, successorAction
+
+                beta = min( beta, v)
+
+                if v < alfa:
+                    return v,pickedAction
+
+            # return the minimum value and corresponding action
+            return v, pickedAction
+
+
+
+        # def max-value(state, a, b):
+        # Initialize v
+        # for each successor of state:
+        # v=max(v, value(successor, a, b))
+        # if v>= b return v
+        # a =max(a,v)
+        # return v
+
+        def maxValue(state, depth, alfa , beta):
+            # TODO check for game state
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state), None
+
+            # Initialize V = -inf
+            #     TODO set
+            #      -v as negative infinity
+            #      -actions for max agent - pass 0 as index
+            #      -picked action as null
+            v = -float('inf')
+            val = v
+            pickedAction = None
+            legalActions = state.getLegalActions(0)  # legal actions for PACMAN
+
+            # TODO check for legal actions, if no more actions return eval function
+            if not legalActions:
+                return self.evaluationFunction(state), None
+
+            # for each successor of the state:
+            for successorAction in legalActions:
+                val, _ = minValue(state.generateSuccessor(0, successorAction), 1, depth, alfa , beta)
+                # if a better action is found - update
+                if v < val:
+                    v, pickedAction = val, successorAction
+
+                alfa = max(alfa, v)
+                if v > beta:
+                    return v, pickedAction
+
+            # Return the maximum value and the corresponding action
+            return v, pickedAction
+
+        # TODO start with max and set alfa and beta
+        optimalVal, optimalAction = maxValue(gameState, 0, float("-inf"), float("inf"))
+        return optimalAction
+
         util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
