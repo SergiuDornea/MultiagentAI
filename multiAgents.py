@@ -97,10 +97,9 @@ class ReflexAgent(Agent):
                 return -99999999
 
         #     TODO return the score according to the state of the game + next food
-        #  multiply with a bigger nunber to prioritize the higher score instead
-        # and the division is responsible to give a higher score to a closer distance
+        # the division is responsible to give a higher score to a closer distance
         # so that the agent chooses the bigger number
-        finalScore = successorGameState.getScore() *9999 + 9 / nextFood
+        finalScore = successorGameState.getScore() + 9 / nextFood
         return finalScore
 
 
@@ -136,12 +135,16 @@ class MultiAgentSearchAgent(Agent):
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
+
+
+
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 2)
     """
 
-    def getAction(self, gameState: GameState):
+    def getAction(self, state: GameState):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
@@ -165,6 +168,104 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        # TODO implement minimax dupa algoritmul de la curs
+        #  ?? Puteți implementa algoritmul in mod recursiv
+        #  acuma se evaluează stări si nu perechi (stare, acțiune).
+
+        # def min-value(state)
+        # Initialize V = inf
+        # for each successor of state:
+        # v = min(v, value(successor))
+        # return v
+        def minValue(state, typeOfAgent, depth):
+            # TODO check for game state
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state), None
+
+            # Initialize V = inf
+            #     TODO set
+            #      -v as infinity
+            #      -actions for min agent - pass typeOfAgent as index
+            #      -picked action as null
+            v = float('inf')
+            pickedAction = None
+            legalActions = state.getLegalActions(typeOfAgent) # lega; action for ghosts
+
+            # TODO check for legal actions, if no more actions return eval function
+            if not legalActions:
+                return self.evaluationFunction(state), None
+
+            # for each successor of state:
+            for successorAction in legalActions:
+                # if the agent is the last one, call the maxValue function for Pacman
+                if typeOfAgent == state.getNumAgents() - 1:
+                    val, _ = maxValue(state.generateSuccessor(typeOfAgent, successorAction), depth + 1)
+                # if the next agent is not the last one - minValue
+                else:
+                    val, _ = minValue(state.generateSuccessor(typeOfAgent, successorAction), typeOfAgent + 1, depth)
+
+                # if  better action is found
+                if v > val:
+                    v, pickedAction = val, successorAction
+
+            # return the minimum value and corresponding action
+            return v, pickedAction
+
+
+
+
+        # def max-value(state):
+        # Initialize v = -inf
+        # for each successor of state:
+        # v = max(v, value(successor))
+        # return v
+        def maxValue(state, depth):
+            # TODO check for game state
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state), None
+
+            # Initialize V = -inf
+            #     TODO set
+            #      -v as negative infinity
+            #      -actions for max agent - pass 0 as index
+            #      -picked action as null
+            v = -float('inf')
+            pickedAction = None
+            legalActions = state.getLegalActions(0) #legal actions for PACMAN
+
+            # TODO check for legal actions, if no more actions return eval function
+            if not legalActions:
+                return self.evaluationFunction(state), None
+
+            # for each successor of the state:
+            for successorAction in legalActions:
+                val, _ = minValue(state.generateSuccessor(0, successorAction), 1, depth)
+                # if a better action is found - update
+                if v < val:
+                    v, pickedAction = val, successorAction
+
+            # Return the maximum value and the corresponding action
+            return v, pickedAction
+
+        # def value(state):
+        #TODO am renuntant la value()
+        def value(state, typeOfAgent, depth):
+            # If the state is a terminal state:
+            # return the state's utility
+            # TODO check if the state is a terminal state (lost, won, reached depth limit)
+            if state.isLose() or state.isWin()or depth == self.depth:
+                return self.evaluationFunction(state)
+
+            # If the next agent is MAX: return max value(state)
+            if typeOfAgent == 0: #the agent is our pacman => max
+                return maxValue(state, depth)
+            else:# If the next agent is MIN: return min value(state)
+                #the agent is a ghost => min
+                return minValue(state, typeOfAgent, depth)
+
+#TODO start with max
+        optimalVal,optimalAction = maxValue(state, 0)
+        return optimalAction
 
         util.raiseNotDefined()
 
