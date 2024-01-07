@@ -311,13 +311,15 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             for successorAction in legalActions:
                 # if the agent is the last one, call the maxValue function for Pacman
                 if typeOfAgent == state.getNumAgents() - 1:
+                    generatedSucc = state.generateSuccessor(typeOfAgent, legalActions)
                     if depth == self.depth - 1:
-                        val, _ = self.evaluationFunction(state.generateSuccessor(typeOfAgent, legalActions))
+                        val, _ = self.evaluationFunction(generatedSucc)
                     else:
-                        val, _ = maxValue(state.generateSuccessor(typeOfAgent,legalActions), depth+1, alfa, beta )
+                        val, _ = maxValue(generatedSucc, depth+1, alfa, beta )
                 # if the next agent is not the last one - minValue
                 else:
-                    val, _ = minValue(state.generateSuccessor(typeOfAgent, successorAction), typeOfAgent + 1, depth, alfa, beta)
+                    generatedSucc = state.generateSuccessor(typeOfAgent, successorAction)
+                    val, _ = minValue(generatedSucc, typeOfAgent + 1, depth, alfa, beta)
 
                 # if  better action is found
                 if v > val:
@@ -393,6 +395,86 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+
+        #TODO foloseste pseudocodul de la curs pentru ajutor
+
+        # def value(state)
+        # if the state is a terminal state: return the state's utility
+        # if the next agent is MAX: return max-value(state)
+        # if the next agent is EXP: return exp-value(state)
+
+        # TODO repair this function maybe :)
+        # def value(state, v, p, succ, typeOfAgent, depth):
+        #     # TODO check for game state
+        #     if state.isWin() or state.isLose() or depth == self.depth:
+        #         return self.evaluationFunction(state)
+        #
+        #     # todo if the next agent is EXP: return exp-value(state)
+        #     if typeOfAgent < state.getNumAgents() - 1:
+        #         v += p * expValue(succ, typeOfAgent + 1, depth)
+        #     # todo if the next agent is MAX: return max-value(state)
+        #     else:
+        #         v += p * maxValue(succ, depth + 1)
+
+        # det max-value(state):
+        # initialize V
+        # for each successor of state:
+        # v= max(v, value(successor))
+        # return v
+
+        def maxValue(state, depth):
+            # TODO check for game state
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state)
+
+            # todo initialize V
+            v = float("-inf")
+            legalActions = state.getLegalActions(0) #legal actions for PACMAN
+
+            # todo for each successor of state:
+            for successorAction in legalActions:
+                #todo v= max(v, value(successor))
+                successor = state.generateSuccessor(0, successorAction)
+                v = max(v, expValue(successor, 1, depth))
+            #todo return v
+            return v
+
+
+        # del exp-value(state)
+        # Initialize v=O
+        # for each successor of state:
+        # p= probability(successor)
+        # v += p * value(successor)
+        # return v
+
+        def expValue(state, agentIndex, depth):
+            # TODO check for game state
+            if state.isWin() or state.isLose() or depth == self.depth:
+                return self.evaluationFunction(state)
+
+            #TODO Initialize v=O
+            v = 0
+            legalActions = state.getLegalActions(agentIndex)
+
+            lenghtOfActions = len(legalActions)
+            p = 100 / lenghtOfActions
+
+            #TODO  for each successor of state:
+            for successorAction in legalActions:
+                successor = state.generateSuccessor(agentIndex, successorAction)
+                if agentIndex < state.getNumAgents() - 1:
+                    v += p * expValue(successor, agentIndex + 1, depth)
+                else:
+                    v += p * maxValue(successor, depth + 1)
+
+            return v
+
+
+        legalActions = gameState.getLegalActions(0)
+        #use a lambda as the seccond parameter to the ,max function
+        optimalAction = max(legalActions, key=lambda succesorAction: expValue(gameState.generateSuccessor(0, succesorAction), 1, 0))
+        return optimalAction
+
         util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState: GameState):
