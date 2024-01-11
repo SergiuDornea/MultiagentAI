@@ -264,23 +264,23 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        # python pacman.py -p AlphaBetaAgent
-
-        #FAIL: test_cases\q3\6-tied-root.test
-#***     Incorrect generated nodes for depth=3
-#***         Student generated nodes: A B max min1 min2
-#***         Correct generated nodes: A B C max min1 min2
-#***     Tree:
-#***         max
-#***        /   \
-#***     min1    min2
-#***      |      /  \
-#***      A      B   C
-#***     10     10   0
-
-        #
-
-
+#         # python pacman.py -p AlphaBetaAgent
+#
+#         #FAIL: test_cases\q3\6-tied-root.test
+# #***     Incorrect generated nodes for depth=3
+# #***         Student generated nodes: A B max min1 min2
+# #***         Correct generated nodes: A B C max min1 min2
+# #***     Tree:
+# #***         max
+# #***        /   \
+# #***     min1    min2
+# #***      |      /  \
+# #***      A      B   C
+# #***     10     10   0
+#
+#         #
+#
+#
 #todo trebuie sa îl adaptați pentru situatia in care in joc se găsesc mai multi strigoi (deci trebuie adaptat pseudocodul pentru mai multe nivele de min).
         # def min-value(state, a, b):
         # Initialize v
@@ -311,24 +311,24 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             for successorAction in legalActions:
                 # if the agent is the last one, call the maxValue function for Pacman
                 if typeOfAgent == state.getNumAgents() - 1:
-                    generatedSucc = state.generateSuccessor(typeOfAgent, legalActions)
+                    generatedSucc = state.generateSuccessor(typeOfAgent, successorAction)
                     if depth == self.depth - 1:
-                        val, _ = self.evaluationFunction(generatedSucc)
+                        val = self.evaluationFunction(generatedSucc)
                     else:
-                        val, _ = maxValue(generatedSucc, depth+1, alfa, beta )
-                # if the next agent is not the last one - minValue
+                        val , _ = maxValue(generatedSucc, depth + 1, alfa, beta)
+                # if the nextagent is not the last one - minValue
                 else:
                     generatedSucc = state.generateSuccessor(typeOfAgent, successorAction)
-                    val, _ = minValue(generatedSucc, typeOfAgent + 1, depth, alfa, beta)
+                    val, _= minValue(generatedSucc, typeOfAgent + 1, depth, alfa, beta)
 
                 # if  better action is found
                 if v > val:
                     v, pickedAction = val, successorAction
-
-                beta = min( beta, v)
-
                 if v < alfa:
-                    return v,pickedAction
+                    return v, pickedAction
+                beta = min(beta, v)
+
+
 
             # return the minimum value and corresponding action
             return v, pickedAction
@@ -368,10 +368,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 # if a better action is found - update
                 if v < val:
                     v, pickedAction = val, successorAction
-
-                alfa = max(alfa, v)
                 if v > beta:
                     return v, pickedAction
+                alfa = max(alfa, v)
+
 
             # Return the maximum value and the corresponding action
             return v, pickedAction
@@ -483,6 +483,9 @@ def betterEvaluationFunction(currentGameState: GameState):
     evaluation function (question 5).
 
     DESCRIPTION: <write something here so we know what you did>
+
+    folosesc algoritmul bfs implementat intr-un proiect anterior
+
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
